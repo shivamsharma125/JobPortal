@@ -1,6 +1,8 @@
 package com.shivam.jobportal.controllers;
 
 import com.shivam.jobportal.dtos.SignUpRequest;
+import com.shivam.jobportal.models.Role;
+import com.shivam.jobportal.models.RoleDto;
 import com.shivam.jobportal.models.User;
 import com.shivam.jobportal.models.UserDto;
 import com.shivam.jobportal.services.IAuthService;
@@ -10,6 +12,9 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+
+import java.util.HashSet;
+import java.util.Set;
 
 @RestController
 @RequestMapping("/api/users")
@@ -27,7 +32,7 @@ public class AuthController {
                 request.getName(),
                 request.getEmail(),
                 request.getPassword(),
-                request.getRoleId()
+                request.getRoleIds()
         );
 
         return ResponseEntity.status(HttpStatus.CREATED).body(from(user));
@@ -38,7 +43,16 @@ public class AuthController {
         userDto.setId(user.getId());
         userDto.setName(user.getName());
         userDto.setEmail(user.getEmail());
-        userDto.setRole(user.getRole());
+        if (user.getRoles() != null) {
+            Set<RoleDto> roleDtos = new HashSet<>();
+            for (Role role : user.getRoles()){
+                RoleDto roleDto = new RoleDto();
+                roleDto.setId(role.getId());
+                roleDto.setName(role.getName());
+                roleDtos.add(roleDto);
+            }
+            userDto.setRoles(roleDtos);
+        }
         return userDto;
     }
 

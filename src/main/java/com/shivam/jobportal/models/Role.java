@@ -1,5 +1,6 @@
 package com.shivam.jobportal.models;
 
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
@@ -13,6 +14,8 @@ import lombok.Setter;
 @AllArgsConstructor
 @Entity
 @Table(name = "roles")
-public class UserRole extends BaseModel {
-    private String role;
+public class Role extends BaseModel {
+    @Column(unique = true, nullable = false)
+    private String name;
+    private String description;
 }
