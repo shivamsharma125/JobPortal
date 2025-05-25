@@ -1,9 +1,6 @@
 package com.shivam.jobportal.advices;
 
-import com.shivam.jobportal.exceptions.InvalidCredentialsException;
-import com.shivam.jobportal.exceptions.InvalidRequestException;
-import com.shivam.jobportal.exceptions.InvalidRoleException;
-import com.shivam.jobportal.exceptions.UserAlreadyExistsException;
+import com.shivam.jobportal.exceptions.*;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -29,5 +26,15 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(InvalidCredentialsException.class)
     public ResponseEntity<String> handleUnAuthorizedState(Exception ex){
         return new ResponseEntity<>(ex.getMessage(),HttpStatus.UNAUTHORIZED);
+    }
+
+    @ExceptionHandler(JobNotFoundException.class)
+    public ResponseEntity<String> handleNotFound(Exception ex){
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(ex.getMessage());
+    }
+
+    @ExceptionHandler(ForbiddenOperationException.class)
+    public ResponseEntity<String> handleForbidden(Exception ex){
+        return ResponseEntity.status(HttpStatus.FORBIDDEN).body(ex.getMessage());
     }
 }

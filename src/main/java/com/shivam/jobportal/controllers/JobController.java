@@ -9,6 +9,7 @@ import com.shivam.jobportal.utils.DateUtils;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
@@ -48,6 +49,23 @@ public class JobController {
                 .map(this::mapToDTO)
                 .toList();
         return ResponseEntity.ok(jobs);
+    }
+
+    @PutMapping("/{jobId}")
+    @PreAuthorize("hasRole('RECRUITER')")
+    public ResponseEntity<JobResponse> updateJob(@PathVariable Long jobId,
+                                                 @RequestBody JobRequest jobRequest,
+                                                 @AuthenticationPrincipal UserDetails userDetails) {
+        Job job = jobService.updateJob(jobId, jobRequest, userDetails.getUsername());
+        return ResponseEntity.ok(mapToDTO(job));
+    }
+
+    @DeleteMapping("/{jobId}")
+    @PreAuthorize("hasRole('RECRUITER')")
+    public ResponseEntity<Void> deleteJob(@PathVariable Long jobId,
+                                          @AuthenticationPrincipal UserDetails userDetails) {
+        jobService.deleteJob(jobId, userDetails.getUsername());
+        return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
     }
 
     private JobResponse mapToDTO(Job job) {
