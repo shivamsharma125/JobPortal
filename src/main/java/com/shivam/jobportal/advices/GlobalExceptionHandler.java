@@ -8,7 +8,8 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 
 @RestControllerAdvice
 public class GlobalExceptionHandler {
-    @ExceptionHandler({UserAlreadyExistsException.class, BookmarkAlreadyExistException.class})
+    @ExceptionHandler({UserAlreadyExistsException.class, BookmarkAlreadyExistException.class,
+            JobApplicationAlreadyExistException.class})
     public ResponseEntity<String> handleConflict(Exception ex) {
         return new ResponseEntity<>(ex.getMessage(), HttpStatus.CONFLICT);
     }
@@ -28,7 +29,8 @@ public class GlobalExceptionHandler {
         return new ResponseEntity<>(ex.getMessage(),HttpStatus.UNAUTHORIZED);
     }
 
-    @ExceptionHandler({JobNotFoundException.class,UserNotFoundException.class, BookmarkNotFoundException.class})
+    @ExceptionHandler({JobNotFoundException.class,UserNotFoundException.class,
+            BookmarkNotFoundException.class,JobApplicationNotFoundException.class})
     public ResponseEntity<String> handleNotFound(Exception ex){
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(ex.getMessage());
     }
