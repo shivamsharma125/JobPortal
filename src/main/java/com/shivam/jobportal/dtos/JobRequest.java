@@ -14,10 +14,14 @@ import java.util.List;
 public class JobRequest {
     private String position;
     private List<String> skills;
-    private int minExperience;
-    private int maxExperience;
-    private double minSalary;
-    private double maxSalary;
-    private int noticePeriod;
+    private Integer minExperience;
+    private Integer maxExperience;
+    private Double minSalary;
+    private Double maxSalary;
+    private Integer noticePeriod;
     private String description;
+    private String location;
+    private Boolean isRemote;
+    private String jobType; // PART_TIME, FULL_TIME
+    private String experienceLevel; // JUNIOR, MID, SENIOR
 }

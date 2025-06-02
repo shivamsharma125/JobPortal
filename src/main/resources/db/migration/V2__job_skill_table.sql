@@ -4,15 +4,19 @@ CREATE TABLE jobs
     created_at       datetime              NULL,
     last_modified_at datetime              NULL,
     state            SMALLINT              NULL,
-    position         VARCHAR(255)          NULL,
-    `description`    VARCHAR(2000)         NULL,
+    position         VARCHAR(255)          NOT NULL,
+    `description`    VARCHAR(2000)         NOT NULL,
     min_experience   INT                   NOT NULL,
     max_experience   INT                   NOT NULL,
     min_salary       DOUBLE                NOT NULL,
     max_salary       DOUBLE                NOT NULL,
     notice_period    INT                   NOT NULL,
-    posted_at        datetime              NULL,
-    posted_by_id     BIGINT                NULL,
+    posted_at        datetime              NOT NULL,
+    posted_by_id     BIGINT                NOT NULL,
+    location         VARCHAR(255)          NOT NULL,
+    is_remote        BIT(1)                NOT NULL,
+    job_type         SMALLINT              NOT NULL,
+    experience_level SMALLINT              NOT NULL,
     CONSTRAINT pk_jobs PRIMARY KEY (id)
 );
 

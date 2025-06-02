@@ -9,7 +9,7 @@ import com.shivam.jobportal.models.RoleDto;
 import com.shivam.jobportal.models.User;
 import com.shivam.jobportal.models.UserDto;
 import com.shivam.jobportal.services.IAuthService;
-import com.shivam.jobportal.utils.StringUtils;
+import com.shivam.jobportal.utils.RequestUtils;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -33,10 +33,10 @@ public class AuthController {
     @PostMapping("/signup")
     public ResponseEntity<UserDto> signUp(@RequestBody SignUpRequest request) {
         // validate input
-        if (StringUtils.isEmpty(request.getEmail())) throw new InvalidRequestException("Invalid email");
-        if (StringUtils.isEmpty(request.getPassword())) throw new InvalidRequestException("Invalid password");
-        if (StringUtils.isEmpty(request.getName())) throw new InvalidRequestException("Invalid name");
-        if (StringUtils.isEmpty(request.getRoleIds())) throw new InvalidRequestException("Invalid role");
+        if (RequestUtils.isEmptyParam(request.getEmail())) throw new InvalidRequestException("Invalid email");
+        if (RequestUtils.isEmptyParam(request.getPassword())) throw new InvalidRequestException("Invalid password");
+        if (RequestUtils.isEmptyParam(request.getName())) throw new InvalidRequestException("Invalid name");
+        if (RequestUtils.isEmptyParam(request.getRoleIds())) throw new InvalidRequestException("Invalid role");
 
         User user = authService.signUp(
                 request.getName(), request.getEmail(),
@@ -49,8 +49,8 @@ public class AuthController {
     @PostMapping("/login")
     public ResponseEntity<LoginResponse> login(@RequestBody LoginRequest request) {
         // validate input
-        if (StringUtils.isEmpty(request.getEmail())) throw new InvalidRequestException("Invalid email");
-        if (StringUtils.isEmpty(request.getPassword())) throw new InvalidRequestException("Invalid password");
+        if (RequestUtils.isEmptyParam(request.getEmail())) throw new InvalidRequestException("Invalid email");
+        if (RequestUtils.isEmptyParam(request.getPassword())) throw new InvalidRequestException("Invalid password");
 
         String token = authService.login(request.getEmail(), request.getPassword());
         return ResponseEntity.ok(new LoginResponse(token));

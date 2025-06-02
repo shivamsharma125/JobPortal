@@ -2,17 +2,16 @@ package com.shivam.jobportal.services;
 
 import com.shivam.jobportal.dtos.JobRequest;
 import com.shivam.jobportal.exceptions.ForbiddenOperationException;
+import com.shivam.jobportal.exceptions.InvalidRequestException;
 import com.shivam.jobportal.exceptions.JobNotFoundException;
-import com.shivam.jobportal.models.Job;
-import com.shivam.jobportal.models.Skill;
-import com.shivam.jobportal.models.User;
+import com.shivam.jobportal.models.*;
 import com.shivam.jobportal.repositories.JobRepository;
 import com.shivam.jobportal.repositories.SkillRepository;
 import com.shivam.jobportal.repositories.UserRepository;
+import com.shivam.jobportal.utils.RequestUtils;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
@@ -42,16 +41,19 @@ public class JobService implements IJobService {
 
         Job job = new Job();
         job.setPosition(jobRequest.getPosition());
-        job.setSkills(new ArrayList<>(skills));
+        job.setDescription(jobRequest.getDescription());
         job.setMinExperience(jobRequest.getMinExperience());
         job.setMaxExperience(jobRequest.getMaxExperience());
         job.setMinSalary(jobRequest.getMinSalary());
         job.setMaxSalary(jobRequest.getMaxSalary());
         job.setNoticePeriod(jobRequest.getNoticePeriod());
-        job.setDescription(jobRequest.getDescription());
         job.setPostedAt(new Date());
+        job.setSkills(skills);
         job.setPostedBy(recruiter);
-
+        job.setLocation(jobRequest.getLocation());
+        job.setIsRemote(jobRequest.getIsRemote());
+        job.setJobType(JobType.valueOf(jobRequest.getJobType()));
+        job.setExperienceLevel(ExperienceLevel.valueOf(jobRequest.getExperienceLevel()));
 
         return jobRepository.save(job);
     }
@@ -71,28 +73,53 @@ public class JobService implements IJobService {
 
     @Override
     public Job updateJob(Long jobId, JobRequest jobRequest, String recruiterEmail) {
-        Job job = jobRepository.findById(jobId)
+        Job savedJob = jobRepository.findById(jobId)
                 .orElseThrow(() -> new JobNotFoundException("Job does not exist"));
 
-        if (!job.getPostedBy().getEmail().equals(recruiterEmail)) {
+        if (!savedJob.getPostedBy().getEmail().equals(recruiterEmail)) {
             throw new ForbiddenOperationException("User is not the owner of this job posting.");
         }
 
-        List<Skill> skills = jobRequest.getSkills().stream()
-                .map(skillName -> skillRepository.findByName(skillName)
+        Integer minExperience = jobRequest.getMinExperience() != null ? jobRequest.getMinExperience() : savedJob.getMinExperience();
+        Integer maxExperience = jobRequest.getMaxExperience() != null ? jobRequest.getMaxExperience() : savedJob.getMaxExperience();
+
+        if (RequestUtils.isInvalidExperienceRange(minExperience,maxExperience))
+            throw new InvalidRequestException("Invalid minExperience or maxExperience");
+
+        Double minSalary = jobRequest.getMinSalary() != null ? jobRequest.getMinSalary() : savedJob.getMinSalary();
+        Double maxSalary = jobRequest.getMaxSalary() != null ? jobRequest.getMaxSalary() : savedJob.getMaxSalary();
+
+        if (RequestUtils.isInvalidSalaryRange(minSalary,maxSalary))
+            throw new InvalidRequestException("Invalid minSalary or maxSalary");
+
+        List<Skill> skills = jobRequest.getSkills() == null ? savedJob.getSkills() :
+                jobRequest.getSkills().stream()
+                        .map(skillName -> skillRepository.findByName(skillName)
                         .orElseGet(() -> skillRepository.save(new Skill(skillName))))
-                .toList();
+                        .toList();
 
-        job.setPosition(jobRequest.getPosition());
-        job.setSkills(new ArrayList<>(skills));
-        job.setMinExperience(jobRequest.getMinExperience());
-        job.setMaxExperience(jobRequest.getMaxExperience());
-        job.setMinSalary(jobRequest.getMinSalary());
-        job.setMaxSalary(jobRequest.getMaxSalary());
-        job.setNoticePeriod(jobRequest.getNoticePeriod());
-        job.setDescription(jobRequest.getDescription());
+        // Update only those fields which are not null
+        if (jobRequest.getPosition() != null)
+            savedJob.setPosition(jobRequest.getPosition());
+        savedJob.setSkills(skills);
+        savedJob.setMinExperience(minExperience);
+        savedJob.setMaxExperience(maxExperience);
+        savedJob.setMinSalary(minSalary);
+        savedJob.setMaxSalary(maxSalary);
+        if (jobRequest.getNoticePeriod() != null)
+            savedJob.setNoticePeriod(jobRequest.getNoticePeriod());
+        if (jobRequest.getDescription() != null)
+            savedJob.setDescription(jobRequest.getDescription());
+        if (jobRequest.getLocation() != null)
+            savedJob.setLocation(jobRequest.getLocation());
+        if (jobRequest.getIsRemote() != null)
+            savedJob.setIsRemote(jobRequest.getIsRemote());
+        if (jobRequest.getJobType() != null)
+            savedJob.setJobType(JobType.valueOf(jobRequest.getJobType()));
+        if (jobRequest.getExperienceLevel() != null)
+            savedJob.setExperienceLevel(ExperienceLevel.valueOf(jobRequest.getExperienceLevel()));
 
-        return jobRepository.save(job);
+        return jobRepository.save(savedJob);
     }
 
     @Override

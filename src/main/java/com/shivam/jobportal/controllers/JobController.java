@@ -2,19 +2,19 @@ package com.shivam.jobportal.controllers;
 
 import com.shivam.jobportal.dtos.JobRequest;
 import com.shivam.jobportal.dtos.JobResponse;
+import com.shivam.jobportal.exceptions.InvalidRequestException;
 import com.shivam.jobportal.models.Job;
-import com.shivam.jobportal.models.Skill;
 import com.shivam.jobportal.services.IJobService;
-import com.shivam.jobportal.utils.DateUtils;
+import com.shivam.jobportal.utils.JobUtils;
+import com.shivam.jobportal.utils.RequestUtils;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
-
 import java.util.List;
+
+import static com.shivam.jobportal.utils.JobUtils.*;
 
 @RestController
 @RequestMapping("/job")
@@ -27,26 +27,28 @@ public class JobController {
 
     @PostMapping
     @PreAuthorize("hasRole('RECRUITER')")
-    public ResponseEntity<JobResponse> createJob(@RequestBody JobRequest dto,
-            @AuthenticationPrincipal UserDetails userDetails) {
-        Job job = jobService.createJob(dto, userDetails.getUsername());
-        return ResponseEntity.status(HttpStatus.CREATED).body(mapToDTO(job));
+    public ResponseEntity<JobResponse> createJob(@RequestBody JobRequest request,
+                                                 Authentication authentication) {
+        validateJobRequest(request);
+
+        Job job = jobService.createJob(request, authentication.getName());
+        return ResponseEntity.status(HttpStatus.CREATED).body(from(job));
     }
 
     @GetMapping
     @PreAuthorize("hasAnyRole('APPLICANT', 'RECRUITER')")
     public ResponseEntity<List<JobResponse>> getAllJobs() {
         List<JobResponse> jobs = jobService.getAllJobs().stream()
-                .map(this::mapToDTO)
+                .map(JobUtils::from)
                 .toList();
         return ResponseEntity.ok(jobs);
     }
 
     @GetMapping("/my")
     @PreAuthorize("hasRole('RECRUITER')")
-    public ResponseEntity<List<JobResponse>> getMyJobs(@AuthenticationPrincipal UserDetails userDetails) {
-        List<JobResponse> jobs = jobService.getJobsByRecruiter(userDetails.getUsername()).stream()
-                .map(this::mapToDTO)
+    public ResponseEntity<List<JobResponse>> getMyJobs(Authentication authentication) {
+        List<JobResponse> jobs = jobService.getJobsByRecruiter(authentication.getName()).stream()
+                .map(JobUtils::from)
                 .toList();
         return ResponseEntity.ok(jobs);
     }
@@ -55,32 +57,39 @@ public class JobController {
     @PreAuthorize("hasRole('RECRUITER')")
     public ResponseEntity<JobResponse> updateJob(@PathVariable Long jobId,
                                                  @RequestBody JobRequest jobRequest,
-                                                 @AuthenticationPrincipal UserDetails userDetails) {
-        Job job = jobService.updateJob(jobId, jobRequest, userDetails.getUsername());
-        return ResponseEntity.ok(mapToDTO(job));
+                                                 Authentication authentication) {
+        if (RequestUtils.isInvalidId(jobId)) throw new InvalidRequestException("Invalid id");
+        if (RequestUtils.isInvalidNoticePeriod(jobRequest.getNoticePeriod())) throw new InvalidRequestException("Invalid or no notice period provided");
+        if (JobUtils.isInvalidJobType(jobRequest.getJobType())) throw new InvalidRequestException("Invalid Job Type");
+        if (JobUtils.isInvalidExperienceLevel(jobRequest.getExperienceLevel())) throw new InvalidRequestException("Invalid Experience Level");
+
+        Job job = jobService.updateJob(jobId, jobRequest,authentication.getName());
+        return ResponseEntity.ok(from(job));
     }
 
     @DeleteMapping("/{jobId}")
     @PreAuthorize("hasRole('RECRUITER')")
     public ResponseEntity<Void> deleteJob(@PathVariable Long jobId,
-                                          @AuthenticationPrincipal UserDetails userDetails) {
-        jobService.deleteJob(jobId, userDetails.getUsername());
+                                         Authentication authentication) {
+        if (RequestUtils.isInvalidId(jobId)) throw new InvalidRequestException("Invalid id");
+        jobService.deleteJob(jobId, authentication.getName());
         return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
     }
 
-    private JobResponse mapToDTO(Job job) {
-        JobResponse jobResponse = new JobResponse();
-        jobResponse.setId(job.getId());
-        jobResponse.setPosition(job.getPosition());
-        jobResponse.setSkills(job.getSkills().stream().map(Skill::getName).toList());
-        jobResponse.setMinExperience(job.getMinExperience());
-        jobResponse.setMaxExperience(job.getMaxExperience());
-        jobResponse.setMinSalary(job.getMinSalary());
-        jobResponse.setMaxSalary(job.getMaxSalary());
-        jobResponse.setNoticePeriod(job.getNoticePeriod());
-        jobResponse.setDescription(job.getDescription());
-        jobResponse.setPostedAt(DateUtils.formatDate(job.getPostedAt()));
-        jobResponse.setPostedBy(job.getPostedBy().getName());
-        return jobResponse;
+    private void validateJobRequest(JobRequest request) {
+        if (RequestUtils.isNull(request.getPosition())) throw new InvalidRequestException("Position cannot be empty");
+        if (RequestUtils.isEmptyParam(request.getSkills())) throw new InvalidRequestException("Skills cannot be empty");
+        if (RequestUtils.isInvalidExperience(request.getMinExperience())) throw new InvalidRequestException("no min experience provided");
+        if (RequestUtils.isInvalidExperience(request.getMaxExperience())) throw new InvalidRequestException("no max experience provided");
+        if (RequestUtils.isInvalidExperienceRange(request.getMinExperience(),request.getMaxExperience())) throw new InvalidRequestException("Invalid experience range");
+        if (RequestUtils.isInvalidSalary(request.getMinSalary())) throw new InvalidRequestException("no min salary provided");
+        if (RequestUtils.isInvalidSalary(request.getMaxSalary())) throw new InvalidRequestException("no max salary provided");
+        if (RequestUtils.isInvalidSalaryRange(request.getMinSalary(),request.getMaxSalary())) throw new InvalidRequestException("Invalid salary range");
+        if (RequestUtils.isInvalidNoticePeriod(request.getNoticePeriod())) throw new InvalidRequestException("Invalid or no notice period provided");
+        if (RequestUtils.isEmptyParam(request.getDescription())) throw new InvalidRequestException("job description cannot be empty");
+        if (RequestUtils.isEmptyParam(request.getLocation())) throw new InvalidRequestException("location cannot be empty");
+        if (RequestUtils.isNull(request.getIsRemote())) throw new InvalidRequestException("not provided remote job status");
+        if (JobUtils.isInvalidJobType(request.getJobType())) throw new InvalidRequestException("Invalid Job Type");
+        if (JobUtils.isInvalidExperienceLevel(request.getExperienceLevel())) throw new InvalidRequestException("Invalid Experience Level");
     }
 }
