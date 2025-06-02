@@ -1,5 +1,6 @@
 package com.shivam.jobportal.security.services;
 
+import com.shivam.jobportal.models.State;
 import com.shivam.jobportal.models.User;
 import com.shivam.jobportal.repositories.UserRepository;
 import com.shivam.jobportal.security.models.CustomUserDetails;
@@ -18,7 +19,7 @@ public class CustomUserDetailsService implements UserDetailsService {
 
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-        User user = userRepository.findByEmail(username)
+        User user = userRepository.findByEmailAndState(username, State.ACTIVE)
                 .orElseThrow(() -> new UsernameNotFoundException("User with email " + username + " does not exists"));
 
         return new CustomUserDetails(user);

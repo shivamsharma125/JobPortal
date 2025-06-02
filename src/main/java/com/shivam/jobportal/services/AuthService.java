@@ -3,6 +3,7 @@ package com.shivam.jobportal.services;
 import com.shivam.jobportal.exceptions.InvalidCredentialsException;
 import com.shivam.jobportal.exceptions.InvalidRoleException;
 import com.shivam.jobportal.exceptions.UserAlreadyExistsException;
+import com.shivam.jobportal.models.State;
 import com.shivam.jobportal.models.User;
 import com.shivam.jobportal.models.Role;
 import com.shivam.jobportal.repositories.RoleRepository;
@@ -37,7 +38,7 @@ public class AuthService implements IAuthService{
 
     @Override
     public User signUp(String name, String email, String password, Set<Long> roleIds) {
-        if (userRepository.existsByEmail(email)) {
+        if (userRepository.existsByEmailAndState(email, State.ACTIVE)) {
             throw new UserAlreadyExistsException("Email is already registered.");
         }
 

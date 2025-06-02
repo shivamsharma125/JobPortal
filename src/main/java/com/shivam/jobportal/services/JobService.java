@@ -31,7 +31,7 @@ public class JobService implements IJobService {
 
     @Override
     public Job createJob(JobRequest jobRequest, String recruiterEmail) {
-        User recruiter = userRepository.findByEmail(recruiterEmail)
+        User recruiter = userRepository.findByEmailAndState(recruiterEmail,State.ACTIVE)
                 .orElseThrow(() -> new UsernameNotFoundException("Recruiter not found"));
 
         List<Skill> skills = jobRequest.getSkills().stream()
@@ -65,7 +65,7 @@ public class JobService implements IJobService {
 
     @Override
     public List<Job> getJobsByRecruiter(String recruiterEmail) {
-        User recruiter = userRepository.findByEmail(recruiterEmail)
+        User recruiter = userRepository.findByEmailAndState(recruiterEmail,State.ACTIVE)
                 .orElseThrow(() -> new UsernameNotFoundException("Recruiter not found"));
 
         return jobRepository.findAllByPostedById(recruiter.getId());
