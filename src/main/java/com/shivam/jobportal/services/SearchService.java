@@ -1,6 +1,6 @@
 package com.shivam.jobportal.services;
 
-import com.shivam.jobportal.dtos.JobFilterRequest;
+import com.shivam.jobportal.dtos.JobFilterRequestDto;
 import com.shivam.jobportal.models.Job;
 import com.shivam.jobportal.repositories.JobRepository;
 import com.shivam.jobportal.utils.specifications.JobSpecification;
@@ -19,7 +19,7 @@ public class SearchService implements ISearchService {
     }
 
     @Override
-    public Page<Job> filterJobs(JobFilterRequest request) {
+    public Page<Job> filterJobs(JobFilterRequestDto request) {
         Sort sort = null;
         if ("salary".equalsIgnoreCase(request.getSortBy())) {
             sort = Sort.by("maxSalary");

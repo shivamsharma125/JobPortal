@@ -1,7 +1,7 @@
 package com.shivam.jobportal.controllers;
 
-import com.shivam.jobportal.dtos.JobFilterRequest;
-import com.shivam.jobportal.dtos.JobResponse;
+import com.shivam.jobportal.dtos.JobFilterRequestDto;
+import com.shivam.jobportal.dtos.JobDto;
 import com.shivam.jobportal.models.Job;
 import com.shivam.jobportal.services.ISearchService;
 import com.shivam.jobportal.utils.JobUtils;
@@ -19,9 +19,9 @@ public class SearchController {
     }
 
     @PostMapping
-    public ResponseEntity<Page<JobResponse>> browseJobs(@RequestBody JobFilterRequest request) {
+    public ResponseEntity<Page<JobDto>> browseJobs(@RequestBody JobFilterRequestDto request) {
         Page<Job> jobs = searchService.filterJobs(request);
-        Page<JobResponse> page = jobs.map(JobUtils::from);
+        Page<JobDto> page = jobs.map(JobUtils::from);
         return ResponseEntity.ok(page);
     }
 }

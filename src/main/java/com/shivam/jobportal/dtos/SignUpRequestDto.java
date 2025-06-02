@@ -11,7 +11,7 @@ import java.util.Set;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-public class SignUpRequest {
+public class SignUpRequestDto {
     private String name;
     private String email;
     private String password;

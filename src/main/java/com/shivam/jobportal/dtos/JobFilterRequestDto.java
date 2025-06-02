@@ -11,7 +11,7 @@ import java.util.List;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-public class JobFilterRequest {
+public class JobFilterRequestDto {
     private String position;
     private List<String> skills;
     private Integer minExperience;

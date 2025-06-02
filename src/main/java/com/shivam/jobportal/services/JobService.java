@@ -1,6 +1,6 @@
 package com.shivam.jobportal.services;
 
-import com.shivam.jobportal.dtos.JobRequest;
+import com.shivam.jobportal.dtos.JobRequestDto;
 import com.shivam.jobportal.exceptions.ForbiddenOperationException;
 import com.shivam.jobportal.exceptions.InvalidRequestException;
 import com.shivam.jobportal.exceptions.JobNotFoundException;
@@ -30,7 +30,7 @@ public class JobService implements IJobService {
     }
 
     @Override
-    public Job createJob(JobRequest jobRequest, String recruiterEmail) {
+    public Job createJob(JobRequestDto jobRequest, String recruiterEmail) {
         User recruiter = userRepository.findByEmailAndState(recruiterEmail,State.ACTIVE)
                 .orElseThrow(() -> new UsernameNotFoundException("Recruiter not found"));
 
@@ -72,7 +72,7 @@ public class JobService implements IJobService {
     }
 
     @Override
-    public Job updateJob(Long jobId, JobRequest jobRequest, String recruiterEmail) {
+    public Job updateJob(Long jobId, JobRequestDto jobRequest, String recruiterEmail) {
         Job savedJob = jobRepository.findById(jobId)
                 .orElseThrow(() -> new JobNotFoundException("Job does not exist"));
 

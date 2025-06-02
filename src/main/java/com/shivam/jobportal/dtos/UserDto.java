@@ -1,5 +1,6 @@
-package com.shivam.jobportal.models;
+package com.shivam.jobportal.dtos;
 
+import com.shivam.jobportal.models.RoleDto;
 import lombok.Getter;
 import lombok.Setter;
 

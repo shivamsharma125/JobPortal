@@ -1,7 +1,7 @@
 package com.shivam.jobportal.controllers;
 
 import com.shivam.jobportal.dtos.JobBookmarkDto;
-import com.shivam.jobportal.dtos.JobResponse;
+import com.shivam.jobportal.dtos.JobDto;
 import com.shivam.jobportal.exceptions.InvalidRequestException;
 import com.shivam.jobportal.models.JobBookmark;
 import com.shivam.jobportal.services.IJobBookmarkService;
@@ -44,9 +44,9 @@ public class JobBookmarkController {
 
     @GetMapping
     @PreAuthorize("hasRole('APPLICANT')")
-    public ResponseEntity<List<JobResponse>> getBookmarkedJobs(Authentication auth) {
+    public ResponseEntity<List<JobDto>> getBookmarkedJobs(Authentication auth) {
         List<JobBookmark> jobBookmarks = bookmarkService.getBookmarkedJobs(auth.getName());
-        List<JobResponse> jobResponses = jobBookmarks.stream()
+        List<JobDto> jobResponses = jobBookmarks.stream()
                 .map(bookmark -> JobUtils.from(bookmark.getJob()))
                 .toList();
         return ResponseEntity.ok(jobResponses);

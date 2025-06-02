@@ -1,6 +1,6 @@
 package com.shivam.jobportal.utils;
 
-import com.shivam.jobportal.dtos.JobResponse;
+import com.shivam.jobportal.dtos.JobDto;
 import com.shivam.jobportal.models.ExperienceLevel;
 import com.shivam.jobportal.models.Job;
 import com.shivam.jobportal.models.JobType;
@@ -9,8 +9,8 @@ import com.shivam.jobportal.models.Skill;
 import java.util.Arrays;
 
 public class JobUtils {
-    public static JobResponse from(Job job) {
-        JobResponse jobResponse = new JobResponse();
+    public static JobDto from(Job job) {
+        JobDto jobResponse = new JobDto();
         jobResponse.setId(job.getId());
         jobResponse.setPosition(job.getPosition());
         if (job.getSkills() != null)

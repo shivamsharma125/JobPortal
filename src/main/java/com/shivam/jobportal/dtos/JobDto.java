@@ -11,7 +11,8 @@ import java.util.List;
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
-public class JobRequest {
+public class JobDto {
+    private Long id;
     private String position;
     private List<String> skills;
     private Integer minExperience;
@@ -20,8 +21,10 @@ public class JobRequest {
     private Double maxSalary;
     private Integer noticePeriod;
     private String description;
+    private String postedAt;
+    private String postedBy;
     private String location;
     private Boolean isRemote;
-    private String jobType; // PART_TIME, FULL_TIME
-    private String experienceLevel; // JUNIOR, MID, SENIOR
+    private String jobType;
+    private String experienceLevel;
 }

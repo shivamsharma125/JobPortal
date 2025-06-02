@@ -1,13 +1,13 @@
 package com.shivam.jobportal.controllers;
 
-import com.shivam.jobportal.dtos.LoginRequest;
-import com.shivam.jobportal.dtos.LoginResponse;
-import com.shivam.jobportal.dtos.SignUpRequest;
+import com.shivam.jobportal.dtos.LoginRequestDto;
+import com.shivam.jobportal.dtos.LoginResponseDto;
+import com.shivam.jobportal.dtos.SignUpRequestDto;
 import com.shivam.jobportal.exceptions.InvalidRequestException;
 import com.shivam.jobportal.models.Role;
 import com.shivam.jobportal.models.RoleDto;
 import com.shivam.jobportal.models.User;
-import com.shivam.jobportal.models.UserDto;
+import com.shivam.jobportal.dtos.UserDto;
 import com.shivam.jobportal.services.IAuthService;
 import com.shivam.jobportal.utils.RequestUtils;
 import org.springframework.http.HttpStatus;
@@ -31,7 +31,7 @@ public class AuthController {
     }
 
     @PostMapping("/signup")
-    public ResponseEntity<UserDto> signUp(@RequestBody SignUpRequest request) {
+    public ResponseEntity<UserDto> signUp(@RequestBody SignUpRequestDto request) {
         // validate input
         if (RequestUtils.isEmptyParam(request.getEmail())) throw new InvalidRequestException("Invalid email");
         if (RequestUtils.isEmptyParam(request.getPassword())) throw new InvalidRequestException("Invalid password");
@@ -47,13 +47,13 @@ public class AuthController {
     }
 
     @PostMapping("/login")
-    public ResponseEntity<LoginResponse> login(@RequestBody LoginRequest request) {
+    public ResponseEntity<LoginResponseDto> login(@RequestBody LoginRequestDto request) {
         // validate input
         if (RequestUtils.isEmptyParam(request.getEmail())) throw new InvalidRequestException("Invalid email");
         if (RequestUtils.isEmptyParam(request.getPassword())) throw new InvalidRequestException("Invalid password");
 
         String token = authService.login(request.getEmail(), request.getPassword());
-        return ResponseEntity.ok(new LoginResponse(token));
+        return ResponseEntity.ok(new LoginResponseDto(token));
     }
 
     private UserDto from(User user){

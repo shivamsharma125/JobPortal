@@ -1,7 +1,7 @@
 package com.shivam.jobportal.controllers;
 
-import com.shivam.jobportal.dtos.JobRequest;
-import com.shivam.jobportal.dtos.JobResponse;
+import com.shivam.jobportal.dtos.JobRequestDto;
+import com.shivam.jobportal.dtos.JobDto;
 import com.shivam.jobportal.exceptions.InvalidRequestException;
 import com.shivam.jobportal.models.Job;
 import com.shivam.jobportal.services.IJobService;
@@ -27,8 +27,8 @@ public class JobController {
 
     @PostMapping
     @PreAuthorize("hasRole('RECRUITER')")
-    public ResponseEntity<JobResponse> createJob(@RequestBody JobRequest request,
-                                                 Authentication authentication) {
+    public ResponseEntity<JobDto> createJob(@RequestBody JobRequestDto request,
+                                            Authentication authentication) {
         validateJobRequest(request);
 
         Job job = jobService.createJob(request, authentication.getName());
@@ -37,8 +37,8 @@ public class JobController {
 
     @GetMapping
     @PreAuthorize("hasAnyRole('APPLICANT', 'RECRUITER')")
-    public ResponseEntity<List<JobResponse>> getAllJobs() {
-        List<JobResponse> jobs = jobService.getAllJobs().stream()
+    public ResponseEntity<List<JobDto>> getAllJobs() {
+        List<JobDto> jobs = jobService.getAllJobs().stream()
                 .map(JobUtils::from)
                 .toList();
         return ResponseEntity.ok(jobs);
@@ -46,8 +46,8 @@ public class JobController {
 
     @GetMapping("/my")
     @PreAuthorize("hasRole('RECRUITER')")
-    public ResponseEntity<List<JobResponse>> getMyJobs(Authentication authentication) {
-        List<JobResponse> jobs = jobService.getJobsByRecruiter(authentication.getName()).stream()
+    public ResponseEntity<List<JobDto>> getMyJobs(Authentication authentication) {
+        List<JobDto> jobs = jobService.getJobsByRecruiter(authentication.getName()).stream()
                 .map(JobUtils::from)
                 .toList();
         return ResponseEntity.ok(jobs);
@@ -55,9 +55,9 @@ public class JobController {
 
     @PutMapping("/{jobId}")
     @PreAuthorize("hasRole('RECRUITER')")
-    public ResponseEntity<JobResponse> updateJob(@PathVariable Long jobId,
-                                                 @RequestBody JobRequest jobRequest,
-                                                 Authentication authentication) {
+    public ResponseEntity<JobDto> updateJob(@PathVariable Long jobId,
+                                            @RequestBody JobRequestDto jobRequest,
+                                            Authentication authentication) {
         if (RequestUtils.isInvalidId(jobId)) throw new InvalidRequestException("Invalid id");
         if (RequestUtils.isInvalidNoticePeriod(jobRequest.getNoticePeriod())) throw new InvalidRequestException("Invalid or no notice period provided");
         if (JobUtils.isInvalidJobType(jobRequest.getJobType())) throw new InvalidRequestException("Invalid Job Type");
@@ -76,7 +76,7 @@ public class JobController {
         return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
     }
 
-    private void validateJobRequest(JobRequest request) {
+    private void validateJobRequest(JobRequestDto request) {
         if (RequestUtils.isNull(request.getPosition())) throw new InvalidRequestException("Position cannot be empty");
         if (RequestUtils.isEmptyParam(request.getSkills())) throw new InvalidRequestException("Skills cannot be empty");
         if (RequestUtils.isInvalidExperience(request.getMinExperience())) throw new InvalidRequestException("no min experience provided");

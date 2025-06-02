@@ -1,6 +1,6 @@
 package com.shivam.jobportal.utils.specifications;
 
-import com.shivam.jobportal.dtos.JobFilterRequest;
+import com.shivam.jobportal.dtos.JobFilterRequestDto;
 import com.shivam.jobportal.models.Job;
 import com.shivam.jobportal.models.Skill;
 import com.shivam.jobportal.models.State;
@@ -14,7 +14,7 @@ import java.util.List;
 
 public class JobSpecification {
 
-    public static Specification<Job> filterJobs(JobFilterRequest request) {
+    public static Specification<Job> filterJobs(JobFilterRequestDto request) {
         return (root, query, criteriaBuilder) -> {
             List<Predicate> predicates = new ArrayList<>();
 
