@@ -10,17 +10,17 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 @Component
-public class RoleInjector {
+public class RoleSeeder {
 
     private final RoleRepository roleRepository;
 
-    public RoleInjector(RoleRepository roleRepository) {
+    public RoleSeeder(RoleRepository roleRepository) {
         this.roleRepository = roleRepository;
     }
 
     @PostConstruct
     public void injectRoles() {
-        Set<String> defaultRoles = Set.of("APPLICANT", "RECRUITER");
+        Set<String> defaultRoles = Set.of("APPLICANT", "RECRUITER", "ADMIN");
 
         List<Role> existingRoles = roleRepository.findAll();
         Set<String> existingRoleNames = existingRoles.stream()
