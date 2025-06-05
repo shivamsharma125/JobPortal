@@ -47,4 +47,8 @@ public class RequestUtils {
     public static boolean isInvalidNoticePeriod(Integer noticePeriod){
         return noticePeriod == null || noticePeriod < 0;
     }
+
+    public static boolean isInvalidNumberOfDays(int days) {
+        return days <= 0;
+    }
 }

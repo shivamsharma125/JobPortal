@@ -36,7 +36,7 @@ public class JobController {
     }
 
     @GetMapping
-    @PreAuthorize("hasAnyRole('APPLICANT', 'RECRUITER')")
+    @PreAuthorize("hasRole('APPLICANT')")
     public ResponseEntity<List<JobDto>> getAllJobs() {
         List<JobDto> jobs = jobService.getAllJobs().stream()
                 .map(JobUtils::from)

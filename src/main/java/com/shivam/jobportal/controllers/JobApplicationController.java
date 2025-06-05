@@ -2,10 +2,12 @@ package com.shivam.jobportal.controllers;
 
 import com.shivam.jobportal.dtos.JobApplicationDto;
 import com.shivam.jobportal.dtos.JobApplicationRequestDto;
+import com.shivam.jobportal.exceptions.InvalidRequestException;
 import com.shivam.jobportal.models.ApplicationStatus;
 import com.shivam.jobportal.models.JobApplication;
 import com.shivam.jobportal.services.IJobApplicationService;
 import com.shivam.jobportal.utils.DateUtils;
+import com.shivam.jobportal.utils.RequestUtils;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -28,11 +30,15 @@ public class JobApplicationController {
     @PreAuthorize("hasRole('APPLICANT')")
     public ResponseEntity<JobApplicationDto> apply(@RequestBody JobApplicationRequestDto request,
                                                    Authentication auth) {
+        if (RequestUtils.isInvalidId(request.getJobId())) throw new InvalidRequestException("Invalid job ID");
+        if (RequestUtils.isEmptyParam(request.getResumeUrl())) throw new InvalidRequestException("Invalid resume URL");
+
         JobApplication jobApplication = jobApplicationService.applyToJob(
                 request.getJobId(),
                 request.getResumeUrl(),
                 auth.getName()
         );
+
         return ResponseEntity.status(HttpStatus.CREATED).body(from(jobApplication));
     }
 
@@ -51,6 +57,8 @@ public class JobApplicationController {
     public ResponseEntity<JobApplicationDto> updateStatus(@PathVariable("id") Long applicationId,
                                                             @RequestParam ApplicationStatus status,
                                                             Authentication auth) {
+        if (RequestUtils.isInvalidId(applicationId)) throw new InvalidRequestException("Invalid application ID");
+
         JobApplication updatedJobApplication = jobApplicationService.updateApplicationStatus(applicationId, status, auth.getName());
         return ResponseEntity.ok(from(updatedJobApplication));
     }

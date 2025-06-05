@@ -18,6 +18,7 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/bookmarks")
+@PreAuthorize("hasRole('APPLICANT')")
 public class JobBookmarkController {
 
     private final IJobBookmarkService bookmarkService;
@@ -27,7 +28,7 @@ public class JobBookmarkController {
     }
 
     @PostMapping("/{jobId}")
-    @PreAuthorize("hasRole('APPLICANT')")
+
     public ResponseEntity<JobBookmarkDto> bookmarkJob(@PathVariable Long jobId, Authentication auth) {
         if (RequestUtils.isInvalidId(jobId)) throw new InvalidRequestException("Invalid job ID");
         JobBookmark bookmark = bookmarkService.bookmark(jobId, auth.getName());
@@ -35,7 +36,6 @@ public class JobBookmarkController {
     }
 
     @DeleteMapping("/{jobId}")
-    @PreAuthorize("hasRole('APPLICANT')")
     public ResponseEntity<Void> removeBookmark(@PathVariable Long jobId, Authentication auth) {
         if (RequestUtils.isInvalidId(jobId)) throw new InvalidRequestException("Invalid job ID");
         bookmarkService.removeBookmark(jobId,auth.getName());
@@ -43,7 +43,6 @@ public class JobBookmarkController {
     }
 
     @GetMapping
-    @PreAuthorize("hasRole('APPLICANT')")
     public ResponseEntity<List<JobDto>> getBookmarkedJobs(Authentication auth) {
         List<JobBookmark> jobBookmarks = bookmarkService.getBookmarkedJobs(auth.getName());
         List<JobDto> jobResponses = jobBookmarks.stream()
