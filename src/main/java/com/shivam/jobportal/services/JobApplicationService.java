@@ -1,5 +1,7 @@
 package com.shivam.jobportal.services;
 
+import com.shivam.jobportal.dtos.ApplicationStatusChangeEvent;
+import com.shivam.jobportal.dtos.JobApplicationEvent;
 import com.shivam.jobportal.exceptions.*;
 import com.shivam.jobportal.models.*;
 import com.shivam.jobportal.repositories.JobApplicationRepository;
@@ -16,12 +18,14 @@ public class JobApplicationService implements IJobApplicationService {
     private final JobApplicationRepository applicationRepository;
     private final JobRepository jobRepository;
     private final UserRepository userRepository;
+    private final NotificationProducerService notificationProducerService;
 
     public JobApplicationService(JobApplicationRepository applicationRepository, JobRepository jobRepository,
-                                 UserRepository userRepository) {
+                                 UserRepository userRepository, NotificationProducerService notificationProducerService) {
         this.applicationRepository = applicationRepository;
         this.jobRepository = jobRepository;
         this.userRepository = userRepository;
+        this.notificationProducerService = notificationProducerService;
     }
 
     @Override
@@ -36,14 +40,22 @@ public class JobApplicationService implements IJobApplicationService {
             throw new JobApplicationAlreadyExistException("You have already applied to this job");
         }
 
-        JobApplication app = new JobApplication();
-        app.setJob(job);
-        app.setApplicant(applicant);
-        app.setResumeUrl(resumeUrl);
-        app.setStatus(ApplicationStatus.APPLIED);
-        app.setAppliedAt(new Date());
+        JobApplication application = new JobApplication();
+        application.setJob(job);
+        application.setApplicant(applicant);
+        application.setResumeUrl(resumeUrl);
+        application.setStatus(ApplicationStatus.APPLIED);
+        application.setAppliedAt(new Date());
 
-        return applicationRepository.save(app);
+        JobApplication savedApplication =  applicationRepository.save(application);
+
+        JobApplicationEvent event = new JobApplicationEvent();
+        event.setApplicantEmail(applicant.getEmail());
+        event.setJobTitle(application.getJob().getPosition());
+        event.setAppliedAt(application.getAppliedAt());
+        notificationProducerService.sendJobApplicationEvent(event);
+
+        return savedApplication;
     }
 
     @Override
@@ -61,6 +73,15 @@ public class JobApplicationService implements IJobApplicationService {
         }
 
         jobApplication.setStatus(status);
-        return applicationRepository.save(jobApplication);
+        JobApplication updatedApplication =  applicationRepository.save(jobApplication);
+
+        ApplicationStatusChangeEvent statusChangedEvent = new ApplicationStatusChangeEvent();
+        statusChangedEvent.setApplicantEmail(jobApplication.getApplicant().getEmail());
+        statusChangedEvent.setJobTitle(jobApplication.getJob().getPosition());
+        statusChangedEvent.setNewStatus(status.name());
+        statusChangedEvent.setUpdatedAt(new Date());
+        notificationProducerService.sendStatusChangeEvent(statusChangedEvent);
+
+        return updatedApplication;
     }
 }
