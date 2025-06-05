@@ -1,4 +1,4 @@
-package com.shivam.jobportal.utils.specifications;
+package com.shivam.jobportal.utils.search.jobs;
 
 import com.shivam.jobportal.dtos.JobFilterRequestDto;
 import com.shivam.jobportal.models.Job;
@@ -12,7 +12,7 @@ import org.springframework.data.jpa.domain.Specification;
 import java.util.ArrayList;
 import java.util.List;
 
-public class JobSpecification {
+public class JpaFilterSpecification {
 
     public static Specification<Job> filterJobs(JobFilterRequestDto request) {
         return (root, query, criteriaBuilder) -> {
@@ -20,8 +20,9 @@ public class JobSpecification {
 
             predicates.add(criteriaBuilder.equal(root.get("state"), State.ACTIVE));
 
-            if (request.getPosition() != null)
+            if (request.getPosition() != null) {
                 predicates.add(criteriaBuilder.like(criteriaBuilder.lower(root.get("position")), "%" + request.getPosition().toLowerCase() + "%"));
+            }
 
             if (request.getLocation() != null)
                 predicates.add(criteriaBuilder.equal(criteriaBuilder.lower(root.get("location")), request.getLocation().toLowerCase()));

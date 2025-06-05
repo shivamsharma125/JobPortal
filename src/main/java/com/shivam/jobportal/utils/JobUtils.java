@@ -21,7 +21,7 @@ public class JobUtils {
         jobResponse.setMaxSalary(job.getMaxSalary());
         jobResponse.setNoticePeriod(job.getNoticePeriod());
         jobResponse.setDescription(job.getDescription());
-        jobResponse.setPostedAt(DateUtils.formatDate(job.getPostedAt()));
+        jobResponse.setPostedAt(job.getPostedAt());
         jobResponse.setPostedBy(job.getPostedBy().getName());
         jobResponse.setLocation(job.getLocation());
         jobResponse.setIsRemote(job.getIsRemote());

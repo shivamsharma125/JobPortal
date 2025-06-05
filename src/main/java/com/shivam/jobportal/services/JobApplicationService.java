@@ -26,7 +26,7 @@ public class JobApplicationService implements IJobApplicationService {
 
     @Override
     public JobApplication applyToJob(Long jobId, String resumeUrl, String applicantEmail) {
-        Job job = jobRepository.findById(jobId)
+        Job job = jobRepository.findByIdAndState(jobId,State.ACTIVE)
                 .orElseThrow(() -> new JobNotFoundException("Job not found or deleted"));
 
         User applicant = userRepository.findByEmailAndState(applicantEmail, State.ACTIVE)

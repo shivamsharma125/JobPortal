@@ -5,6 +5,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.util.Date;
 import java.util.List;
 
 @Getter
@@ -21,7 +22,7 @@ public class JobDto {
     private Double maxSalary;
     private Integer noticePeriod;
     private String description;
-    private String postedAt;
+    private Date postedAt;
     private String postedBy;
     private String location;
     private Boolean isRemote;

@@ -29,11 +29,11 @@ public class JobBookmarkService implements IJobBookmarkService {
 
     @Override
     public JobBookmark bookmark(Long jobId, String userEmail) {
-        Job job = jobRepository.findById(jobId)
-                .orElseThrow(() -> new JobNotFoundException("Job not found"));
+        Job job = jobRepository.findByIdAndState(jobId,State.ACTIVE)
+                .orElseThrow(() -> new JobNotFoundException("Job not found or deleted"));
 
         User user = userRepository.findByEmailAndState(userEmail, State.ACTIVE)
-                .orElseThrow(() -> new UserNotFoundException("User not found"));
+                .orElseThrow(() -> new UserNotFoundException("User not found or deleted"));
 
         if (bookmarkRepository.existsByUserEmailAndJobIdAndState(userEmail, jobId, State.ACTIVE)) {
             throw new BookmarkAlreadyExistException("Already bookmarked");

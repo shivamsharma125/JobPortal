@@ -1,5 +1,6 @@
 package com.shivam.jobportal.services;
 
+import com.shivam.jobportal.clients.ElasticSearchApiClient;
 import com.shivam.jobportal.dtos.JobRequestDto;
 import com.shivam.jobportal.exceptions.ForbiddenOperationException;
 import com.shivam.jobportal.exceptions.InvalidRequestException;
@@ -12,8 +13,12 @@ import com.shivam.jobportal.utils.RequestUtils;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.stream.Collectors;
+
+import static com.shivam.jobportal.utils.JobUtils.from;
 
 @Service
 public class JobService implements IJobService {
@@ -21,12 +26,14 @@ public class JobService implements IJobService {
     private final JobRepository jobRepository;
     private final SkillRepository skillRepository;
     private final UserRepository userRepository;
+    private final ElasticSearchApiClient elasticSearchApiClient;
 
     public JobService(JobRepository jobRepository, SkillRepository skillRepository,
-                      UserRepository userRepository) {
+                      UserRepository userRepository, ElasticSearchApiClient elasticSearchApiClient) {
         this.jobRepository = jobRepository;
         this.skillRepository = skillRepository;
         this.userRepository = userRepository;
+        this.elasticSearchApiClient = elasticSearchApiClient;
     }
 
     @Override
@@ -53,14 +60,19 @@ public class JobService implements IJobService {
         job.setLocation(jobRequest.getLocation());
         job.setIsRemote(jobRequest.getIsRemote());
         job.setJobType(JobType.valueOf(jobRequest.getJobType()));
-        job.setExperienceLevel(ExperienceLevel.valueOf(jobRequest.getExperienceLevel()));
+        job.setExperienceLevel(ExperienceLevel.valueOf(jobRequest.getExperienceLevel()));;
 
-        return jobRepository.save(job);
+        Job savedJob = jobRepository.save(job);
+
+        // Index in Elasticsearch
+        elasticSearchApiClient.saveJob(from(savedJob));
+
+        return savedJob;
     }
 
     @Override
     public List<Job> getAllJobs() {
-        return jobRepository.findAll();
+        return jobRepository.findAllByState(State.ACTIVE);
     }
 
     @Override
@@ -68,12 +80,12 @@ public class JobService implements IJobService {
         User recruiter = userRepository.findByEmailAndState(recruiterEmail,State.ACTIVE)
                 .orElseThrow(() -> new UsernameNotFoundException("Recruiter not found"));
 
-        return jobRepository.findAllByPostedById(recruiter.getId());
+        return jobRepository.findAllByPostedByIdAndState(recruiter.getId(),State.ACTIVE);
     }
 
     @Override
     public Job updateJob(Long jobId, JobRequestDto jobRequest, String recruiterEmail) {
-        Job savedJob = jobRepository.findById(jobId)
+        Job savedJob = jobRepository.findByIdAndState(jobId,State.ACTIVE)
                 .orElseThrow(() -> new JobNotFoundException("Job does not exist"));
 
         if (!savedJob.getPostedBy().getEmail().equals(recruiterEmail)) {
@@ -96,7 +108,7 @@ public class JobService implements IJobService {
                 jobRequest.getSkills().stream()
                         .map(skillName -> skillRepository.findByName(skillName)
                         .orElseGet(() -> skillRepository.save(new Skill(skillName))))
-                        .toList();
+                        .collect(Collectors.toCollection(ArrayList::new));
 
         // Update only those fields which are not null
         if (jobRequest.getPosition() != null)
@@ -119,19 +131,27 @@ public class JobService implements IJobService {
         if (jobRequest.getExperienceLevel() != null)
             savedJob.setExperienceLevel(ExperienceLevel.valueOf(jobRequest.getExperienceLevel()));
 
-        return jobRepository.save(savedJob);
+        savedJob = jobRepository.save(savedJob);
+
+        // Update in Elasticsearch
+        elasticSearchApiClient.updateJob(from(savedJob));
+
+        return savedJob;
     }
 
     @Override
     public void deleteJob(Long jobId, String recruiterEmail) {
-        Job job = jobRepository.findById(jobId)
-                .orElseThrow(() -> new JobNotFoundException("Job does not exist"));
+        Job job = jobRepository.findByIdAndState(jobId,State.ACTIVE)
+                .orElseThrow(() -> new JobNotFoundException("Job does not exist or deleted"));
 
         if (!job.getPostedBy().getEmail().equals(recruiterEmail)) {
             throw new ForbiddenOperationException("You are not the owner of this job posting.");
         }
 
         jobRepository.delete(job);
+
+        // Remove from Elasticsearch
+        elasticSearchApiClient.deleteJobById(jobId);
     }
 }
 

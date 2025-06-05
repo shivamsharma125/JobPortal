@@ -1,9 +1,10 @@
 package com.shivam.jobportal.services;
 
+import com.shivam.jobportal.dtos.JobDto;
 import com.shivam.jobportal.dtos.JobFilterRequestDto;
-import com.shivam.jobportal.models.Job;
-import org.springframework.data.domain.Page;
+
+import java.util.List;
 
 public interface ISearchService {
-    Page<Job> filterJobs(JobFilterRequestDto jobFilterRequest);
+    List<JobDto> filterJobs(JobFilterRequestDto jobFilterRequest);
 }

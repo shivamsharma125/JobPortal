@@ -1,13 +1,15 @@
 package com.shivam.jobportal.controllers;
 
-import com.shivam.jobportal.dtos.JobFilterRequestDto;
 import com.shivam.jobportal.dtos.JobDto;
-import com.shivam.jobportal.models.Job;
+import com.shivam.jobportal.dtos.JobFilterRequestDto;
 import com.shivam.jobportal.services.ISearchService;
-import com.shivam.jobportal.utils.JobUtils;
-import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+
+import java.util.List;
 
 @RestController
 @RequestMapping("/search")
@@ -18,10 +20,8 @@ public class SearchController {
         this.searchService = searchService;
     }
 
-    @PostMapping
-    public ResponseEntity<Page<JobDto>> browseJobs(@RequestBody JobFilterRequestDto request) {
-        Page<Job> jobs = searchService.filterJobs(request);
-        Page<JobDto> page = jobs.map(JobUtils::from);
-        return ResponseEntity.ok(page);
+    @GetMapping
+    public ResponseEntity<List<JobDto>> browseJobs(@RequestBody JobFilterRequestDto request) {
+        return ResponseEntity.ok(searchService.filterJobs(request));
     }
 }
