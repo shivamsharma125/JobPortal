@@ -178,5 +178,7 @@ jobportal/
 * Resume uploads & recruiter shortlisting
 * Notification preferences (SMS, email, in-app)
 * User profile enrichment (skills, resume parser)
-
+* Integration with Calendar APIs to streamline slot booking and meeting generation.
+* Implement OAuth2 to allow users to sign up and log in using their Google, LinkedIn, or GitHub accounts.
+* Automatically extract details like skills, education, and experience from uploaded PDF resumes to auto-fill the user profile.
 ---
