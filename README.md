@@ -1,4 +1,4 @@
-# 💼 JobPortal Backend Application
+# 💼 Job Search & Recruitment Platform
 
 A feature-rich and scalable **Job Portal Backend** built with **Spring Boot**, enabling job seekers to explore opportunities and apply, while recruiters can manage postings efficiently. Includes advanced **search**, **authentication**, **notifications**, and **admin analytics**.
 
