@@ -8,7 +8,7 @@ A feature-rich and scalable **Job Portal Backend** built with **Spring Boot**, e
 
 ### 👨‍💻 Applicant & Recruiter Workflows
 
-* Register/login via **JWT** or **OAuth2** (Google)
+* Register/login via **JWT**
 * **Applicants** can:
 
     * Search & filter jobs (skills, experience, salary, location, etc.)
@@ -33,7 +33,6 @@ A feature-rich and scalable **Job Portal Backend** built with **Spring Boot**, e
 ### 🔐 Secure Authentication & Authorization
 
 * **JWT-based stateless security**
-* Supports **Google OAuth2** login
 * **Role-based access control** (ADMIN / RECRUITER / APPLICANT)
 * Passwords hashed using **BCrypt**
 
@@ -67,7 +66,7 @@ A feature-rich and scalable **Job Portal Backend** built with **Spring Boot**, e
 | Search Engine | **Elasticsearch**               |
 | Messaging     | **Apache Kafka**                |
 | Email         | JavaMail                        |
-| Auth          | Spring Security + JWT + OAuth2  |
+| Auth          | Spring Security + JWT |
 
 ---
 
